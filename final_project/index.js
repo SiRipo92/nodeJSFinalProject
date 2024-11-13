@@ -18,7 +18,7 @@ app.use(
     })
 );
 
-// Use the genl_routes router at the '/book' endpoint
+// Use the genl_routes router at the '/baook' endpoint
 app.use('/book', genl_routes);
 
 app.use("/customer/auth/*", function auth(req,res,next){
@@ -50,4 +50,4 @@ const PORT =5001;
 app.use("/customer", customer_routes);
 app.use("/", genl_routes);
 
-app.listen(PORT,()=>console.log("Server is running"));
+app.listen(PORT,()=>console.log("Server is running at port " + PORT));
