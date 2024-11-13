@@ -50,19 +50,27 @@ public_users.get('/', async function (req, res) {
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
+// Task 11: refactor endpoint to be asynchronous using async/await
+
+const getBooksByIsbn = async (isbn) => {
+  return new Promise ((resolve, reject) => {
+    const book = books[isbn]; // Search for book by ISBN from the books object
+    if (book) {
+      resolve(book); // If the book is found, resolve the promise w/ the book
+    } else {
+      reject("Book not found"); // If no book is found, reject the promise.
+    }
+  });
+};
+
+public_users.get('/isbn/:isbn', async function (req, res) {
   // Extract the ISBN parameter from the request URL
   const isbn = req.params.isbn;
-
-  // Find the book matching the provided ISBN
-  let book = books[isbn];  // Since your `books` object is using ISBN as the key
-
-  // If the book is found, send the book details as the response
-  if (book) {
-    res.json(book);
-  } else {
-    // If no book is found, send an error message
-    return res.status(404).json({ message: "Book not found" });
+  try {
+    const book = await getBooksByIsbn(isbn); // Wait for the async operation
+    res.json(book); //Send the book details as the response 
+  } catch (error) {
+    res.status(404).json({ message: error }); // If error occurs (such as the book is not found), send error message
   }
  });
   
