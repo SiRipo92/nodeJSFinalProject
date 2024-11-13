@@ -99,15 +99,27 @@ public_users.get('/author/:author', async function (req, res) {
   }
 });
 
-// Get all books based on title
-public_users.get('/title/:title',function (req, res) {
+// Task 13 - Simulate an asynchronous operation to get books by Title
+const getBooksByTitle = async (title) => {
+  return new Promise((resolve, reject) => {
+    let booksByTitle = Object.values(books).filter(book=> book.title.toLowerCase() === title.toLowerCase());
+    if (booksByTitle.length > 0) {
+      resolve(booksByTitle);
+    } else {
+      reject("No books found by this title"); 
+    }
+  });
+};
+
+// Get all books based on title (Task 13)
+public_users.get('/title/:title', async function (req, res) {
   // Same request as previous examples (get title from URL)
   const title = req.params.title;
-  let booksByTitle = Object.values(books).filter(book => book.title.toLowerCase() === title.toLowerCase());
-  if (booksByTitle.length > 0) {
+  try {
+    const booksByTitle = await getBooksByTitle(title);
     res.json(booksByTitle);
-  } else {
-    return res.status(404).json({ message: "No books found by this title" });
+  } catch {
+    res.status(404).json({ message: error});
   }
 });
 
