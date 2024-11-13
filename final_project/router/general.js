@@ -3,6 +3,7 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const axios = require("axios"); // For async/await promises 
 
 
 public_users.post("/register", (req,res) => {
@@ -25,9 +26,27 @@ public_users.post("/register", (req,res) => {
   return res.status(201).json({message: "User registeration successful."});
 });
 
+
+// Async function to simulate fetching books from an external API or database
+const getBooks = async () => {
+  // Simulate an async task like an API call or DB query
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(books);  // Resolve with the local books data
+    }, 1000);  // Simulate a delay of 1 second
+  });
+};
+
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  res.json(JSON.parse(JSON.stringify(books))); // Converts the books object to a JSON string and then back to an object
+// Task 10: use async/await to refactor code
+public_users.get('/', async function (req, res) {
+  try {
+    const booksList = await getBooks(); // Wait for aysnc task to complete
+    res.json(booksList); // Send the books as the response
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    res.status(500).json({ message: "Error fetching books" });
+  }
 });
 
 // Get book details based on ISBN
