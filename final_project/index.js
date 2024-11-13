@@ -22,13 +22,25 @@ app.use(
 app.use('/book', genl_routes);
 
 app.use("/customer/auth/*", function auth(req,res,next){
-    // Check if the user is authenticated through a session
-    if (req.session && req.session.user) {
-        // Session exists, proceed to the next route handler
-        next();
+    // Check if there is an authorization object in the session
+    if (req.session.authorization) {
+        // Get the access token stored in the session
+         const token = req.session.authorization['accessToken'];
+        // Verify the token using JWT
+        jwt.verify(token, "access", (err, user) => {
+            if (err) {
+                // If the token verification fails, return an error
+                return res.status(403).json({ message: "User not authenticated" });
+            } else {
+                // If the token is valid, attach user information to the request object
+                req.user = user;
+                // Proceed to the next middleware or route handler
+                next();
+            }
+        });
     } else {
-        // If no session found, respond with a 401 Unauthorized error
-        return res.status(401).json({ message: "Unauthorized access" });
+        // If no authorization information exists, return a 403 error
+        return res.status(403).json({ message: "User not logged in" });
     }
 });
  
