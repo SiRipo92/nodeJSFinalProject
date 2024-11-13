@@ -74,18 +74,28 @@ public_users.get('/isbn/:isbn', async function (req, res) {
   }
  });
   
+// Simulate an asynchronous operation to get books by author
+const getBooksByAuthor = async (author) => {
+  return new Promise((resolve, reject) => {
+    // Filter book list by the provided author (case insensitive)
+    let booksByAuthor = Object.values(books).filter(book => book.author.toLowerCase() === author.toLowerCase());
+    if (booksByAuthor.length > 0) {
+      resolve(booksByAuthor); // Resolve the Promise with the filtered books
+    } else {
+      reject("No books found by this author."); // Reject the Promise w/ an Error message
+    }
+  });
+};
+
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
+public_users.get('/author/:author', async function (req, res) {
   // Extract the author parameter from the request URL (similarly to ISBN)
   const author = req.params.author;
-  // Find all the books where the author matches the requested author
-  let booksByAuthor = Object.values(books).filter(book => book.author.toLowerCase() === author.toLowerCase());
-  // IF books are found, send them as a response
-  if (booksByAuthor.length > 0) {
-    res.json(booksByAuthor);
-  } else {
-    // If no books are found, send a 404 error
-    return res.status(404).json({ message: "No books were found by this author" });
+  try {
+    const booksByAuthor = await getBooksByAuthor(author); // Wait for the operation
+    res.json(booksByAuthor); // Send the books by the author as a response
+  } catch (error) {
+    res.status(404).json({ message: error }); 
   }
 });
 
