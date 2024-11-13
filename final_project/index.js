@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const session = require('express-session')
 const customer_routes = require('./router/auth_users.js').authenticated;
 const genl_routes = require('./router/general.js').general;
+require('dotenv').config(); // Load variables from .env
 
 const app = express();
 
@@ -12,9 +13,10 @@ app.use(express.json());
 app.use(
     "/customer", 
     session({
-        secret:"fingerprint_customer",
+        secret:process.env.JWT_SECRET,
         resave: true, 
-        saveUninitialized: true
+        saveUninitialized: true,
+        cookie: { secure: false, maxAge:3600000 } // 1 hour
     })
 );
 
@@ -27,7 +29,7 @@ app.use("/customer/auth/*", function auth(req,res,next){
         // Get the access token stored in the session
          const token = req.session.authorization['accessToken'];
         // Verify the token using JWT
-        jwt.verify(token, "access", (err, user) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
             if (err) {
                 // If the token verification fails, return an error
                 return res.status(403).json({ message: "User not authenticated" });

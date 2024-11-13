@@ -5,7 +5,7 @@ let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
 
-public_users.post("/customer/register", (req,res) => {
+public_users.post("/register", (req,res) => {
   const { username, password } = req.body;
 
   // Check if both username and password are provided
@@ -13,9 +13,9 @@ public_users.post("/customer/register", (req,res) => {
     return res.status(400).json({ message: "Both username and password are required."});
   }
 
-  // Check if username already exists
-  if (isValid(username)) {
-    return res.status(404).json({ message: "Username already exists."});
+   // Check if username already exists (make sure the `isValid` function checks the `users` array)
+   if (users.some(user => user.username === username)) {
+    return res.status(409).json({ message: "Username already exists." });  // 409 Conflict instead of 404
   }
 
   // Add new user to the users array
